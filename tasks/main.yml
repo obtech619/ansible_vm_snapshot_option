@@ -1,0 +1,34 @@
+---
+
+- name: Gather info about the virtual machine
+  vmware_guest_info:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
+    datacenter: "{{ datacenter_name }}"
+    name: "{{ vm_name }}"
+  delegate_to: localhost
+  register: vm_query
+
+- name: Set VM Folder fact
+  set_fact:
+    vm_folder: "{{ vm_query.instance.hw_folder }}"
+
+- debug:
+    msg: "{{ vm_folder }}"
+
+- name: VM Snapshot Action
+  vmware_guest_snapshot:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
+    datacenter: "{{ datacenter_name }}"
+    folder: "{{ vm_folder }}"
+    name: "{{ vm_name }}"
+    state: "{{ snap_action }}"
+    snapshot_name: "{{ snap_name }}"
+    quiesce: "{{ quiesce_yn }}"
+    memory_dump: "{{ memory_yn }}"
+  delegate_to: localhost
